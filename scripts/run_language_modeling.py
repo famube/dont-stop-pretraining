@@ -707,7 +707,7 @@ def main():
         args.block_size = tokenizer.max_len
         # Our input block size will be the max possible for the model
     else:
-        args.block_size = min(args.block_size, tokenizer.max_len)
+        args.block_size = args.block_size #min(args.block_size, tokenizer.max_len)
 
     if args.model_name_or_path:
         model = AutoModelWithLMHead.from_pretrained(
