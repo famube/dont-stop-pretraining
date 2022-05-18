@@ -50,6 +50,7 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizer,
     get_linear_schedule_with_warmup,
+    BertForMaskedLM
 )
 
 
@@ -710,12 +711,15 @@ def main():
         args.block_size = args.block_size #min(args.block_size, tokenizer.max_len)
 
     if args.model_name_or_path:
-        model = AutoModelWithLMHead.from_pretrained(
-            args.model_name_or_path,
-            from_tf=bool(".ckpt" in args.model_name_or_path),
-            config=config,
-            cache_dir=args.cache_dir,
-        )
+        if args.mlm:
+            model = BertForMaskedLM.from_pretrained(args.model_name_or_path)
+        else:
+            model = AutoModelWithLMHead.from_pretrained(
+                args.model_name_or_path,
+                from_tf=bool(".ckpt" in args.model_name_or_path),
+                config=config,
+                cache_dir=args.cache_dir,
+            )
     else:
         logger.info("Training new model from scratch")
         model = AutoModelWithLMHead.from_config(config)
