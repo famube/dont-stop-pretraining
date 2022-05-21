@@ -322,7 +322,7 @@ def train(args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedToke
     )
     set_seed(args)  # Added here for reproducibility
     for epoch in train_iterator:
-        epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
+        epoch_iterator = tqdm(train_dataloader, desc=f"train_loss={tr_loss} Iteration", disable=args.local_rank not in [-1, 0])
 
         if args.local_rank != -1:
             train_sampler.set_epoch(epoch)
