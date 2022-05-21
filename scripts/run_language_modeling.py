@@ -322,11 +322,11 @@ def train(args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedToke
     )
     set_seed(args)  # Added here for reproducibility
     for epoch in train_iterator:
-        epoch_iterator = tqdm(train_dataloader, desc=f"train_loss={tr_loss} Iteration", disable=args.local_rank not in [-1, 0])
+        epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
 
         if args.local_rank != -1:
             train_sampler.set_epoch(epoch)
-
+        epoch_loss = 0
         for step, batch in enumerate(epoch_iterator):
 
             # Skip past any already trained steps if resuming training
@@ -347,6 +347,7 @@ def train(args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedToke
             if args.gradient_accumulation_steps > 1:
                 loss = loss / args.gradient_accumulation_steps
 
+            epoch_loss += loss
             if args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
@@ -399,9 +400,12 @@ def train(args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedToke
             if args.max_steps > 0 and global_step > args.max_steps:
                 epoch_iterator.close()
                 break
+        epoch_loss /= step
+        print("Loss:", epoch_loss)
         if args.max_steps > 0 and global_step > args.max_steps:
             train_iterator.close()
             break
+
 
     if args.local_rank in [-1, 0]:
         tb_writer.close()
